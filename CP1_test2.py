@@ -17,8 +17,8 @@ class Robot:
         self.goal = goal
 
     def move(self, grid):
-        if self.position == self.goal:
-            return  # Already at the goal
+        # if self.position == self.goal:
+        #     return  # Already at the goal
 
         # Calculate the shortest path (greedy move)
         dx = self.goal[0] - self.position[0]
@@ -64,7 +64,7 @@ class Grid:
                     if other_robot.type == 'quadrotor':
                         return False
                 elif robot.type == 'humanoid':
-                    if other_robot.type in ['humanoid', 'differential_drive']:
+                    if other_robot.type in ['humanoid', 'differential_drive']:#shorten later
                         return False
                 elif robot.type == 'differential_drive':
                     if other_robot.type in ['differential_drive', 'humanoid']:
@@ -80,7 +80,7 @@ class Grid:
 
         for robot in self.robots:
             if robot.position == robot.goal:
-                continue  # Skip robots that have reached their goal
+                #continue  # Skip robots that have reached their goal
                 # Remove robots that have reached their goal
                 self.robots = [robot for robot in self.robots if robot.position != robot.goal]
             # Calculate the next position
@@ -168,6 +168,7 @@ def visualize(grid, timestep):
     ax.grid(True)
     plt.title(f"Timestep: {timestep}")
 
+
     # Draw robots that have reached their goals as black dots
     for robot in grid.reached_goals:
         plt.plot(robot.goal[1], robot.goal[0], 'o', color='black', label='_nolegend_')
@@ -212,7 +213,7 @@ def main():
 
     timestep = 0
     while not grid.all_reached_goals():
-        visualize(grid, timestep)
+        visualize(grid, timestep)   
         grid.update()
         timestep += 1
 
