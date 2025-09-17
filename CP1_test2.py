@@ -18,6 +18,7 @@ class Robot:
 
     def move(self, grid):
         if self.position == self.goal:
+            print(f"Robot {self.id} ({self.type}) already at goal {self.goal}")
             return  # Already at the goal
 
         # Calculate the shortest path (greedy move)
@@ -41,7 +42,10 @@ class Robot:
 
         # Check movement rules
         if grid.can_move(self, new_position):
+            print(f"Robot {self.id} ({self.type}) moving from {self.position} to {new_position} (goal: {self.goal})")
             self.position = new_position
+        else:
+            print(f"Robot {self.id} ({self.type}) cannot move from {self.position} (goal: {self.goal})")
 
 class Grid:
     def __init__(self, size):
@@ -97,6 +101,7 @@ class Grid:
                     target_positions[new_position] = [robot]
                 else:
                     target_positions[new_position].append(robot)
+                    print("Conflict at", new_position, "between robots", [r.id for r in target_positions[new_position]])
                     
 
         # Resolve conflicts for target positions
@@ -110,11 +115,7 @@ class Grid:
                 robots.sort(key=lambda r: abs(r.goal[0] - r.position[0]) + abs(r.goal[1] - r.position[1]), reverse=True)
                 chosen_robot = robots[0]
                 chosen_robot.position = position
-                for other_robot in robots[1:]:
-                    self.attempt_switch()
-                    print("called attempt switch")
-                      # Attempt to switch positions with adjacent robots
-                    pass
+                
 
     def attempt_switch(self):
         for robot in self.robots:
@@ -127,40 +128,44 @@ class Grid:
 
                 # Check if they are adjacent
                 if abs(robot.position[0] - other_robot.position[0]) + abs(robot.position[1] - other_robot.position[1]) == 1:
-                    # Check if robots can occupy each other's positions
+                    print(f"[attempt_switch] Trying to switch Robot {robot.id} at {robot.position} with Robot {other_robot.id} at {other_robot.position}")
                     original_rob_1_pos1 = robot.position
                     original_rob_2_pos2 = other_robot.position
-                   
                     # check distance from robots to goals after a switch
                     first_robot_to_others_goal = abs(other_robot.goal[0] - robot.position[0]) + abs(other_robot.goal[1] - robot.position[1])
                     other_robots_to_firsts_goal = abs(robot.goal[0] - other_robot.position[0]) + abs(robot.goal[1] - other_robot.position[1])
-                    current_distance = first_robot_to_others_goal + other_robots_to_firsts_goal
-                   
+                    switched_distance = first_robot_to_others_goal + other_robots_to_firsts_goal
                     # check potential to self positions distance
                     first_robot_to_firsts_goal = abs(robot.goal[0] - robot.position[0]) + abs(robot.goal[1] - robot.position[1])
                     other_robots_to_others_goal = abs(other_robot.goal[0] - other_robot.position[0]) + abs(other_robot.goal[1] - other_robot.position[1])
                     self_distance = first_robot_to_firsts_goal + other_robots_to_others_goal
-
                     #check to see if its valid to switch by the rules of the bots
-                    if self.can_move(robot, original_rob_2_pos2) and self.can_move(other_robot, original_rob_1_pos1):
-                        if self_distance > current_distance:
-                            # Revert positions if not beneficial
-                            robot.position = original_rob_2_pos2
-                            other_robot.position = original_rob_1_pos1
-                            print("Switched")
-
-                  
-
-                   
-
+                 
+                   # print(f"[attempt_switch] Switch allowed between Robot {robot.id} and Robot {other_robot.id}")
+                    # 1st robot to second's goal and 2nd's to 1's goal
+                    if self_distance >= switched_distance:
+                        print(f"[attempt_switch] Switch IS beneficial for Robot {robot.id} and Robot {other_robot.id}, switching.")
+                        robot.position = original_rob_2_pos2
+                        other_robot.position = original_rob_1_pos1
+                    else:
+                        print(f"[attempt_switch] Switch NOT beneficial for Robot {robot.id} and Robot {other_robot.id} (self_distance={self_distance}, switched_distance={switched_distance})")
+                    
     def update(self):
         # Sort robots by distance to goal (descending)
         self.robots.sort(key=lambda r: abs(r.goal[0] - r.position[0]) + abs(r.goal[1] - r.position[1]), reverse=True)
+        reached_step = []
         for robot in self.robots[:]:  # Iterate over a copy of the list
             robot.move(self)
+    
             if robot.position == robot.goal:
-                self.reached_goals.append(robot)  # Add to reached goals list
-                self.robots.remove(robot)
+                self.reached_goals.append(robot) 
+                reached_step.append(robot)  # Add to reached goals list
+                # changed it so that it doesnt take a new timestep for each robot that reaches its goal
+            
+        for robot in reached_step:
+            self.robots.remove(robot)  # Remove robots that reached their goal after all moves
+            print(f"[update] Robot {robot.id} reached goal at {robot.goal}")
+        self.attempt_switch()
     def all_reached_goals(self):
         return len(self.robots) == 0
     
@@ -217,7 +222,12 @@ def main():
     while not grid.all_reached_goals():
         visualize(grid, timestep)
         grid.update()
+        print("end of timestep", timestep)
         timestep += 1
+        
+        if timestep > 15:  # Safety break to prevent infinite loops
+            print("Reached maximum timesteps.")
+            break
 
     visualize(grid, timestep)  # Final state
     plt.show()  # Keep the final figure open
