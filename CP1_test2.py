@@ -129,23 +129,23 @@ class Grid:
                     robot.position = pos2
                     other_robot.position = pos1
 
-                    if not self.can_move(robot, robot.position) or not self.can_move(other_robot, other_robot.position):
-                        # Revert positions if move is not allowed
-                        robot.position = pos1
-                        other_robot.position = pos2
-                        continue
+                    # if not self.can_move(robot, robot.position) or not self.can_move(other_robot, other_robot.position):
+                    #     # Revert positions if move is not allowed
+                    #     robot.position = pos1
+                    #     other_robot.position = pos2
+                    #     continue
 
                     # Check if switching is beneficial
-                    robot_to_other_distance = abs(other_robot.goal[0] - robot.position[0]) + abs(other_robot.goal[1] - robot.position[1])
-                    other_to_robot_distance = abs(robot.goal[0] - other_robot.position[0]) + abs(robot.goal[1] - other_robot.position[1])
-                    current_distance = abs(robot.goal[0] - temp_pos[0]) + abs(robot.goal[1] - temp_pos[1]) + \
-                                    abs(other_robot.goal[0] - other_robot.position[0]) + abs(other_robot.goal[1] - other_robot.position[1])
-                    new_distance = robot_to_other_distance + other_to_robot_distance
+                    # robot_to_other_distance = abs(other_robot.goal[0] - robot.position[0]) + abs(other_robot.goal[1] - robot.position[1])
+                    # other_to_robot_distance = abs(robot.goal[0] - other_robot.position[0]) + abs(robot.goal[1] - other_robot.position[1])
+                    # current_distance = abs(robot.goal[0] - temp_pos[0]) + abs(robot.goal[1] - temp_pos[1]) + \
+                    #                 abs(other_robot.goal[0] - other_robot.position[0]) + abs(other_robot.goal[1] - other_robot.position[1])
+                    # new_distance = robot_to_other_distance + other_to_robot_distance
 
-                    if new_distance >= current_distance:
-                        # Revert positions if not beneficial
-                        robot.position = temp_pos
-                        other_robot.position = other_robot.position
+                    # if new_distance >= current_distance:
+                    #     # Revert positions if not beneficial
+                    #     robot.position = temp_pos
+                    #     other_robot.position = other_robot.position
 
     def update(self):
         # Sort robots by distance to goal (descending)
@@ -171,15 +171,18 @@ def visualize(grid, timestep):
     # Draw robots that have reached their goals as black dots
     for robot in grid.reached_goals:
         plt.plot(robot.goal[1], robot.goal[0], 'o', color='black', label='_nolegend_')
+        plt.text(robot.goal[1], robot.goal[0],'Fin')
 
     for robot in grid.robots:
         # Draw the goal
         goal_marker = patches.Rectangle((robot.goal[1] - 0.5, robot.goal[0] - 0.5), 1, 1, color='gray', alpha=0.3)
         ax.add_patch(goal_marker)
+        plt.text(robot.goal[1], robot.goal[0],('g'+str(robot.id)))
 
         # Draw the robot
         color = {'quadrotor': 'blue', 'humanoid': 'green', 'differential_drive': 'red'}[robot.type]
         plt.plot(robot.position[1], robot.position[0], 'o', color=color, label=robot.type)
+        plt.text(robot.position[1], robot.position[0],robot.id)
 
         # Draw a line with an arrow to the goal
         plt.annotate(
