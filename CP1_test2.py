@@ -84,9 +84,11 @@ class Grid:
 
         for robot in self.robots:
             if robot.position == robot.goal:
-                continue  # Skip robots that have reached their goal
                 # Remove robots that have reached their goal
-                self.robots = [robot for robot in self.robots if robot.position != robot.goal]
+                #self.robots = [robot for robot in self.robots if robot.position != robot.goal]
+                continue  # Skip robots that have reached their goal
+                
+                
             # Calculate the next position
             dx = robot.goal[0] - robot.position[0]
             dy = robot.goal[1] - robot.position[1]
@@ -165,6 +167,7 @@ class Grid:
         for robot in reached_step:
             self.robots.remove(robot)  # Remove robots that reached their goal after all moves
             print(f"[update] Robot {robot.id} reached goal at {robot.goal}")
+            
         self.attempt_switch()
     def all_reached_goals(self):
         return len(self.robots) == 0
@@ -182,15 +185,18 @@ def visualize(grid, timestep):
     # Draw robots that have reached their goals as black dots
     for robot in grid.reached_goals:
         plt.plot(robot.goal[1], robot.goal[0], 'o', color='black', label='_nolegend_')
+        plt.text(robot.goal[1], robot.goal[0],('r'+str(robot.id)))
 
     for robot in grid.robots:
         # Draw the goal
         goal_marker = patches.Rectangle((robot.goal[1] - 0.5, robot.goal[0] - 0.5), 1, 1, color='gray', alpha=0.3)
         ax.add_patch(goal_marker)
+        plt.text(robot.goal[1], robot.goal[0],('g'+str(robot.id)), color='gray')
 
         # Draw the robot
         color = {'quadrotor': 'blue', 'humanoid': 'green', 'differential_drive': 'red'}[robot.type]
         plt.plot(robot.position[1], robot.position[0], 'o', color=color, label=robot.type)
+        plt.text(robot.position[1], robot.position[0],('r'+str(robot.id)), color=color)
 
         # Draw a line with an arrow to the goal
         plt.annotate(
@@ -218,6 +224,20 @@ def main():
         robot = Robot(i, robot_type, start, goal)
         grid.add_robot(robot)
 
+
+    #forcing in 2 robots that have each other as goal to simulate loop
+    # positions = random.sample([(i, j) for i in range(GRID_SIZE) for j in range(GRID_SIZE)], 20)
+    # for i in range(8):
+    #     start = positions[i]
+    #     goal = positions[i + 10]
+    #     robot_type = random.choice(ROBOT_TYPES)
+    #     robot = Robot(i, robot_type, start, goal)
+    #     grid.add_robot(robot)
+    # robot = Robot(9,"humanoid", (3,0),(3,3))
+    # grid.add_robot(robot)
+    # robot = Robot(10,"humanoid", (3,3),(3,0))
+    # grid.add_robot(robot)
+
     timestep = 0
     while not grid.all_reached_goals():
         visualize(grid, timestep)
@@ -237,5 +257,3 @@ if __name__ == "__main__":
     timestep = main() 
 
     print("All robots reached their goals in", timestep, "timesteps.")# Print the final timestep value
-
-
