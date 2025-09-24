@@ -1,6 +1,6 @@
 to do 
 1. figure out switching (amy) 
-2. add debugging - exit if stuck in loop ( 
+2. add debugging - exit if stuck in loop (done?) 
 3. editing - remove unnecessary codes  (
 
 4. Paper 
@@ -27,4 +27,7 @@ When plotting with matplotlib, you use plt.plot(x, y, ...), so you pass self.pos
 
 so all the math has been working, but the x and y variables have actually been switched this whole time ! 
 
-4. notices sometimes arrows anddots dont amtch colors green arrow to bluedot 
+4. notices sometimes arrows anddots dont amtch colors green arrow to bluedot
+
+Evan: Debugging
+1. added labels to the robots, their goals, and when robots are at their goals. This will help with identificaiton.
