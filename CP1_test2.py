@@ -7,7 +7,7 @@ import matplotlib.patches as patches
 GRID_SIZE = 5
 
 # Robot types
-ROBOT_TYPES = ['quadrotor', 'humanoid', 'differential_drive']
+Types = ['quadrotor', 'humanoid', 'differential_drive']
 
 class Robot:
     def __init__(self, robot_id, robot_type, start, goal):
@@ -18,7 +18,7 @@ class Robot:
 
     def move(self, grid):
         if self.position == self.goal:
-            print(f"Robot {self.id} ({self.type}) already at goal {self.goal}")
+            #print(f"Robot {self.id} ({self.type}) already at goal {self.goal}")
             return  # Already at the goal
 
         # Calculate the shortest path (greedy move)
@@ -42,10 +42,11 @@ class Robot:
 
         # Check movement rules
         if grid.can_move(self, new_position):
-            print(f"Robot {self.id} ({self.type}) moving from {self.position} to {new_position} (goal: {self.goal})")
+            #print(f"Robot {self.id} ({self.type}) moving from {self.position} to {new_position} (goal: {self.goal})")
             self.position = new_position
         else:
-            print(f"Robot {self.id} ({self.type}) cannot move from {self.position} (goal: {self.goal})")
+            pass
+            #print(f"Robot {self.id} ({self.type}) cannot move from {self.position} (goal: {self.goal})")
 
 class Grid:
     def __init__(self, size):
@@ -61,18 +62,31 @@ class Grid:
             return False  # Out of bounds
 
         # Check if the position is already occupied
-        for other_robot in self.robots:
-            if other_robot.position == position:
+        for other in self.robots:
+            if other.position == position:
                 # Handle rules for occupying the same cell
-                if robot.type == 'quadrotor':
-                    if other_robot.type == 'quadrotor':
-                        return False
-                elif robot.type == 'humanoid':
-                    if other_robot.type in ['humanoid', 'differential_drive']:
-                        return False
-                elif robot.type == 'differential_drive':
-                    if other_robot.type in ['differential_drive', 'humanoid']:
-                        return False
+                match robot.type:
+                    case 'quadrotor':
+                        if other.type == Types[0]:
+                            return False
+                    case 'humanoid':
+                        # if other.type != Types[0]:
+                        #     return False
+                        return other.type == Types[0]
+                    case 'differential_drive':
+                        # if other.type != Types[0]:
+                        #     return False 
+                        return other.type == Types[0]
+                        
+                # if robot.type == Types[0]:
+                #     if other.type == Types[0]:
+                #         return False
+                # elif robot.type == Types[1]:
+                #     if other.type == Types[1] or Types[2]:
+                #         return False
+                # elif robot.type == Types[2]:
+                #     if other.type == Types[1] or Types[2]:
+                #         return False
         return True
 
     def resolve_conflicts(self):
@@ -103,7 +117,7 @@ class Grid:
                     target_positions[new_position] = [robot]
                 else:
                     target_positions[new_position].append(robot)
-                    print("Conflict at", new_position, "between robots", [r.id for r in target_positions[new_position]])
+                    #print("Conflict at", new_position, "between robots", [r.id for r in target_positions[new_position]])
                     
 
         # Resolve conflicts for target positions
@@ -115,8 +129,9 @@ class Grid:
 
                 # Multiple robots want to move to this position
                 robots.sort(key=lambda r: abs(r.goal[0] - r.position[0]) + abs(r.goal[1] - r.position[1]), reverse=True)
-                chosen_robot = robots[0]
-                chosen_robot.position = position
+                robots[0].position = position
+                # chosen_robot = robots[0]
+                # chosen_robot.position = position
                 
 
     def attempt_switch(self):
@@ -124,33 +139,34 @@ class Grid:
             if robot.position == robot.goal:
                 continue  # Skip robots that have reached their goal
 
-            for other_robot in self.robots:
-                if other_robot == robot or other_robot.position == other_robot.goal:
+            for other in self.robots:
+                if other == robot or other.position == other.goal:
                     continue  # Skip itself or robots already at their goal
 
                 # Check if they are adjacent
-                if abs(robot.position[0] - other_robot.position[0]) + abs(robot.position[1] - other_robot.position[1]) == 1:
-                    print(f"[attempt_switch] Trying to switch Robot {robot.id} at {robot.position} with Robot {other_robot.id} at {other_robot.position}")
-                    original_rob_1_pos1 = robot.position
-                    original_rob_2_pos2 = other_robot.position
+                if abs(robot.position[0] - other.position[0]) + abs(robot.position[1] - other.position[1]) == 1:
+                    #print(f"[attempt_switch] Trying to switch Robot {robot.id} at {robot.position} with Robot {other.id} at {other.position}")
+                    r1_pos1 = robot.position
+                    r2_pos2 = other.position
                     # check distance from robots to goals after a switch
-                    first_robot_to_others_goal = abs(other_robot.goal[0] - robot.position[0]) + abs(other_robot.goal[1] - robot.position[1])
-                    other_robots_to_firsts_goal = abs(robot.goal[0] - other_robot.position[0]) + abs(robot.goal[1] - other_robot.position[1])
-                    switched_distance = first_robot_to_others_goal + other_robots_to_firsts_goal
+                    r1_to_g2 = abs(other.goal[0] - robot.position[0]) + abs(other.goal[1] - robot.position[1])
+                    r2_to_g1 = abs(robot.goal[0] - other.position[0]) + abs(robot.goal[1] - other.position[1])
+                    switched_distance = r1_to_g2 + r2_to_g1
                     # check potential to self positions distance
-                    first_robot_to_firsts_goal = abs(robot.goal[0] - robot.position[0]) + abs(robot.goal[1] - robot.position[1])
-                    other_robots_to_others_goal = abs(other_robot.goal[0] - other_robot.position[0]) + abs(other_robot.goal[1] - other_robot.position[1])
-                    self_distance = first_robot_to_firsts_goal + other_robots_to_others_goal
+                    r1_to_g1 = abs(robot.goal[0] - robot.position[0]) + abs(robot.goal[1] - robot.position[1])
+                    r2_to_g2 = abs(other.goal[0] - other.position[0]) + abs(other.goal[1] - other.position[1])
+                    self_distance = r1_to_g1 + r2_to_g2
                     #check to see if its valid to switch by the rules of the bots
                  
-                   # print(f"[attempt_switch] Switch allowed between Robot {robot.id} and Robot {other_robot.id}")
+                   # print(f"[attempt_switch] Switch allowed between Robot {robot.id} and Robot {other.id}")
                     # 1st robot to second's goal and 2nd's to 1's goal
                     if self_distance >= switched_distance:
-                        print(f"[attempt_switch] Switch IS beneficial for Robot {robot.id} and Robot {other_robot.id}, switching.")
-                        robot.position = original_rob_2_pos2
-                        other_robot.position = original_rob_1_pos1
+                        #print(f"[attempt_switch] Switch IS beneficial for Robot {robot.id} and Robot {other.id}, switching.")
+                        robot.position = r2_pos2
+                        other.position = r1_pos1
                     else:
-                        print(f"[attempt_switch] Switch NOT beneficial for Robot {robot.id} and Robot {other_robot.id} (self_distance={self_distance}, switched_distance={switched_distance})")
+                        pass
+                        #print(f"[attempt_switch] Switch NOT beneficial for Robot {robot.id} and Robot {other.id} (self_distance={self_distance}, switched_distance={switched_distance})")
                     
     def update(self):
         # Sort robots by distance to goal (descending)
@@ -166,7 +182,7 @@ class Grid:
             
         for robot in reached_step:
             self.robots.remove(robot)  # Remove robots that reached their goal after all moves
-            print(f"[update] Robot {robot.id} reached goal at {robot.goal}")
+            #print(f"[update] Robot {robot.id} reached goal at {robot.goal}")
             
         self.attempt_switch()
     def all_reached_goals(self):
@@ -220,7 +236,7 @@ def main():
     for i in range(10):
         start = positions[i]
         goal = positions[i + 10]
-        robot_type = random.choice(ROBOT_TYPES)
+        robot_type = random.choice(Types)
         robot = Robot(i, robot_type, start, goal)
         grid.add_robot(robot)
 
@@ -230,7 +246,7 @@ def main():
     # for i in range(8):
     #     start = positions[i]
     #     goal = positions[i + 10]
-    #     robot_type = random.choice(ROBOT_TYPES)
+    #     robot_type = random.choice(Types)
     #     robot = Robot(i, robot_type, start, goal)
     #     grid.add_robot(robot)
     # robot = Robot(9,"humanoid", (3,0),(3,3))
@@ -242,12 +258,13 @@ def main():
     while not grid.all_reached_goals():
         visualize(grid, timestep)
         grid.update()
-        print("end of timestep", timestep)
+        #print("end of timestep", timestep)
         timestep += 1
         
-        if timestep > 15:  # Safety break to prevent infinite loops
-            print("Reached maximum timesteps.")
-            break
+        #Redundant code, looping issue has been solved
+        # if timestep > 15:  # Safety break to prevent infinite loops
+        #     #print("Reached maximum timesteps.")
+        #     break
 
     visualize(grid, timestep)  # Final state
     plt.show()  # Keep the final figure open
@@ -256,4 +273,4 @@ def main():
 if __name__ == "__main__":
     timestep = main() 
 
-    print("All robots reached their goals in", timestep, "timesteps.")# Print the final timestep value
+    #print("All robots reached their goals in", timestep, "timesteps.")# Print the final timestep value
