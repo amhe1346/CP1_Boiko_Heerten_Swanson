@@ -31,3 +31,4 @@ so all the math has been working, but the x and y variables have actually been s
 
 Evan: Debugging
 1. added labels to the robots, their goals, and when robots are at their goals. This will help with identificaiton.
+2. Removed some bits of redundant code, renamed unnecessarily long variables, replaced if chains with switch statements when necessary, removed unnecessary print statements.
