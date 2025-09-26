@@ -1,9 +1,9 @@
 to do 
 1. figure out switching (amy) 
 2. add debugging - exit if stuck in loop (done?) 
-3. editing - remove unnecessary codes  (
+3. editing - remove unnecessary codes  (Evan) done
 
-4. Paper 
+4. Paper(done?)
 
 
 
