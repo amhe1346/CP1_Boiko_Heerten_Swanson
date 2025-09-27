@@ -2,6 +2,9 @@ Instructions:
 
 CP1_test2.py  is the main source code for the challenge problem one. It runs the project. Download and run it . 
 
+thepdf of the report is uploaded as Challenge Problem 1 Report - ROBO 5000.pdf
+grid.py is a practice of how to make the mapping system and is not used in cp1_test2.py
+
 
 
 
