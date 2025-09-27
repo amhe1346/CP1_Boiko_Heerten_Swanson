@@ -1,3 +1,12 @@
+Instructions: 
+
+CP1_test2.py  is the main source code for the challenge problem one. It runs the project. Download and run it . 
+
+
+
+
+
+
 to do 
 1. figure out switching (amy) 
 2. add debugging - exit if stuck in loop (done?) 
